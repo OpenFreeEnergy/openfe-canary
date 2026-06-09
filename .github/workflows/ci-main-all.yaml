@@ -1,0 +1,72 @@
+name: "ci-main-all"
+
+on:
+  schedule:
+    - cron: "0 4 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.workflow }}-${{ github.ref }}"
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: bash -leo pipefail {0}
+
+jobs:
+  tests:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout openfe
+        uses: actions/checkout@v6
+        with:
+          repository: OpenFreeEnergy/openfe
+          path: openfe
+
+      - name: Get current date
+        id: date
+        run: echo "date=$(date +%Y-%m-%d)" >> "${GITHUB_OUTPUT}"
+        # TODO: echo git commit?
+
+      - name: Install openfe environment
+        uses: mamba-org/setup-micromamba@v3
+        with:
+          environment-file: openfe/environment.yaml
+          cache-environment: true
+          cache-downloads: true
+          cache-environment-key: environment-${{ steps.date.outputs.date }}
+          cache-downloads-key: downloads-${{ steps.date.outputs.date }}
+          init-shell: bash
+  
+      - name: "Install Ecosystem packages from @main"
+        run: |
+          python -m pip install git+https://github.com/OpenFreeEnergy/konnektor@main
+          python -m pip install git+https://github.com/OpenFreeEnergy/kartograf@main
+          python -m pip install git+https://github.com/OpenFreeEnergy/openfe_analysis@main
+          python -m pip install git+https://github.com/OpenFreeEnergy/Lomap@main
+          python -m pip install git+https://github.com/OpenFreeEnergy/cinnabar@main
+
+          python -m pip install --no-deps -e .
+
+      - name: "Environment Information"
+        run: |
+          micromamba info
+          micromamba list
+          pip list
+
+      - name: "Test imports"
+        run: |
+          python -Ic "import konnektor; print(konnektor.__version__)"
+          python -Ic "import kartograf; print(kartograf.__version__)"
+          python -Ic "import openfe_analysis; print(openfe_analysis.__version__)"
+          python -Ic "import lomap2; print(lomap2.__version__)"
+          python -Ic "import cinnabar; print(cinnabar.__version__)"
+          python -Ic "import openfe; print(openfe.__version__)"
+
+      - name: "Run tests"
+        env:
+          # Set the OFE_SLOW_TESTS to True if running a Cron job
+          OFE_SLOW_TESTS: 'true'
+          DUECREDIT_ENABLE: 'yes'
+        run: |
+          pytest -n auto -v --cov=openfe --cov=openfecli --cov-report=xml --durations=10
