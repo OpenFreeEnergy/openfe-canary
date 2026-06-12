@@ -31,7 +31,7 @@ jobs:
       - name: Install openfe environment
         uses: mamba-org/setup-micromamba@v3
         with:
-          environment-file: openfe/environment.yaml
+          environment-file: openfe/environment.yml
           cache-environment: true
           cache-downloads: true
           cache-environment-key: environment-${{ steps.date.outputs.date }}
