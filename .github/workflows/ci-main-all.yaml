@@ -46,7 +46,7 @@ jobs:
           python -m pip install git+https://github.com/OpenFreeEnergy/Lomap@main
           python -m pip install git+https://github.com/OpenFreeEnergy/cinnabar@main
 
-          python -m pip install --no-deps -e .
+          python -m pip install --no-deps -e openfe/.
 
       - name: "Environment Information"
         run: |
@@ -70,3 +70,4 @@ jobs:
           DUECREDIT_ENABLE: 'yes'
         run: |
           pytest -n auto -v --cov=openfe --cov=openfecli --cov-report=xml --durations=10
+
