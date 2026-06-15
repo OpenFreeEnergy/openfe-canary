@@ -59,7 +59,7 @@ jobs:
           python -Ic "import konnektor; print(konnektor.__version__)"
           python -Ic "import kartograf; print(kartograf.__version__)"
           python -Ic "import openfe_analysis; print(openfe_analysis.__version__)"
-          python -Ic "import lomap2; print(lomap2.__version__)"
+          python -Ic "import lomap; print(lomap.__version__)"
           python -Ic "import cinnabar; print(cinnabar.__version__)"
           python -Ic "import openfe; print(openfe.__version__)"
 
